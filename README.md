@@ -1,32 +1,21 @@
-# Android Testing Codelab
+# Run instrumentation tests concurrently on Firebase test lab
+This repository shows how you can severely reduce the time taken to run instrumentation tests on cloud-based app-testing infrastructure like Firebase test lab. It forks an [Android testing codelab](https://github.com/googlecodelabs/android-testing) to act as a sample project to show a demo.
 
-This folder contains the source code for the Android testing codelab. It gives an introduction into testing on Android, including unit tests and UI tests. 
+The idea is simply based on:
+1) Importing an [annotation processor](https://github.com/blink22/android-testing/wiki/Mechanism-of-the-solution#annotation-processor), in your project, which creates a file with the full names of all the instrumentation test cases at the build time.
+2) Run a [bash script](https://github.com/blink22/android-testing/wiki/Mechanism-of-the-solution#parallel-execution-of-shell-scripts) which executes those tests concurrently on Firebase test lab. 
 
 ### Getting Started
-
-Check out branch `master` or any of our step branches `step-1-5` to start and follow the instructions here: http://www.code-labs.io/codelabs/android-testing/
-
-
-Clone this repository, enter the top level directory and run <code>./gradlew tasks</code> to get an overview of all the tasks available for this project.
-
-### License
-
-
+These are the steps to to integrate the tweak to the sample project [Android testing codelab](https://github.com/googlecodelabs/android-testing):
+1. Import the annotation processor module as shown in this [commit](https://github.com/blink22/android-testing/commit/9229584e8b1fffdc9c51d40126f1aeea7181fa8b).
+2. Add [these bash scripts](https://github.com/blink22/android-testing/commit/e80e5af8e9f34a21a101f7bc8e1f538ee0c62d92) to the root of the project.
+3. Uncomment this [bash code](https://github.com/blink22/android-testing/commit/e80e5af8e9f34a21a101f7bc8e1f538ee0c62d92#diff-6e2bcd2d1f99813f25d89faebd67efb1R12) after doing the necessary substitution. 
+4. Make sure you have [configured local gcloud sdk environment](https://firebase.google.com/docs/test-lab/android/command-line#configure_your_local_google_cloud_sdk_environment).
+5. Execute the following bash code in the project root directory:
 ```
-Copyright 2016 Google, Inc.
-
-Licensed to the Apache Software Foundation (ASF) under one or more contributor
-license agreements. See the NOTICE file distributed with this work for
-additional information regarding copyright ownership. The ASF licenses this
-file to you under the Apache License, Version 2.0 (the "License"); you may not
-use this file except in compliance with the License. You may obtain a copy of
-the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-License for the specific language governing permissions and limitations under
-the License.
+./gradlew clean
+./gradlew assembleMockDebug # builds app APK
+./gradlew assembleMockDebugAndroidTest # builds ui-test APK and generates "ui-tests" file
+bash firebase-run-tests-concurrently.sh ui-tests  
 ```
+
